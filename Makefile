@@ -12,10 +12,10 @@ obj = $(patsubst %.c, %.o, $(src))
 
 fdfs_upload_test=./test/fdfs_test
 redis_api_test=./test/redis_api_test
+redis_op_test=./test/redis_op_test
 
 
-
-target=$(fdfs_upload_test) $(redis_api_test)
+target=$(fdfs_upload_test) $(redis_api_test) $(redis_op_test)
 
 
 ALL:$(target)
@@ -33,6 +33,9 @@ $(fdfs_upload_test):./test/fdfs_test.o $(obj)
 	$(CC) $^ -o $@ $(LIBS)
 
 $(redis_api_test):./test/redis_api_test.o $(obj)
+	$(CC) $^ -o $@ $(LIBS)
+
+$(redis_op_test):./test/redis_op_test.o $(obj)
 	$(CC) $^ -o $@ $(LIBS)
 
 
