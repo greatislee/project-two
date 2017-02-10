@@ -12,7 +12,6 @@
 #include <string.h>
 #include "make_log.h"
 
-
 #define REDIS_LOG_MODULE          "database"
 #define REDIS_LOG_PROC            "redis"
 
@@ -421,5 +420,9 @@ int rop_string_set(redisContext * conn,const char* key, const char* value);
 /* -------------------------------------------*/
 
 int  rop_string_get(redisContext *conn,const char* key, char *value); 
+
+int rop_hash_set(redisContext *conn,const char* key,const char* field, const char* value);
+
+int rop_hash_get(const char* key,const char* field, char* value);
 
 #endif
