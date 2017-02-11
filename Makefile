@@ -1,7 +1,7 @@
 CC=gcc
 CPPFLAGS= -I./include -I /usr/local/include/hiredis
 CFLAGS=-Wall 
-LIBS=-lhiredis
+LIBS=-lhiredis -lfcgi
 
 #找到当前目录下所有的.c文件
 src = $(wildcard *.c)
@@ -10,12 +10,15 @@ src = $(wildcard *.c)
 obj = $(patsubst %.c, %.o, $(src))
 
 
+#可执行程序的名字的路径
 fdfs_upload_test=./test/fdfs_test
 redis_api_test=./test/redis_api_test
 redis_op_test=./test/redis_op_test
+fastcgi_upload=./test/fastcgi_upload
 
 
-target=$(fdfs_upload_test) $(redis_api_test) $(redis_op_test)
+target=$(fdfs_upload_test) $(redis_api_test) $(redis_op_test) $(fastcgi_upload)
+
 
 
 ALL:$(target)
@@ -26,8 +29,6 @@ $(obj):%.o:%.c
 	$(CC) -c $< -o $@ $(CPPFLAGS) $(CFLAGS) 
 
 
-
-
 #fdfs_upload_test程序
 $(fdfs_upload_test):./test/fdfs_test.o $(obj)
 	$(CC) $^ -o $@ $(LIBS)
@@ -36,6 +37,9 @@ $(redis_api_test):./test/redis_api_test.o $(obj)
 	$(CC) $^ -o $@ $(LIBS)
 
 $(redis_op_test):./test/redis_op_test.o $(obj)
+	$(CC) $^ -o $@ $(LIBS)
+
+$(fastcgi_upload):./test/fastcgi_upload.o $(obj)
 	$(CC) $^ -o $@ $(LIBS)
 
 
