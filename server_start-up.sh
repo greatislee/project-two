@@ -15,5 +15,4 @@ sudo nginx
 echo nginx 启动成功！
 
 #spawn-fcgi
-spawn-fcgi -a 127.0.0.1 -p 8082 ./test/fastcgi_upload
-echo spawn-fcgi 启动成功！
+spawn-fcgi -a 127.0.0.1 -p 8082 ./test/fastcgi_upload && echo spawn-fcgi 启动成功！

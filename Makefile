@@ -1,7 +1,8 @@
 CC=gcc
-CPPFLAGS= -I./include -I /usr/local/include/hiredis
+CPPFLAGS= -I./include -I /usr/local/include/hiredis -I /usr/include/fastdfs/ -I /usr/include/fastcommon/
+
 CFLAGS=-Wall 
-LIBS=-lhiredis -lfcgi
+LIBS=-lhiredis -lfcgi -lfastcommon -lfdfsclient
 
 #找到当前目录下所有的.c文件
 src = $(wildcard *.c)
@@ -11,7 +12,7 @@ obj = $(patsubst %.c, %.o, $(src))
 
 
 #可执行程序的名字的路径
-fdfs_upload_test=./test/fdfs_test
+fdfs_upload_test=./test/fdfs_test_demo
 redis_api_test=./test/redis_api_test
 redis_op_test=./test/redis_op_test
 fastcgi_upload=./test/fastcgi_upload
@@ -30,7 +31,7 @@ $(obj):%.o:%.c
 
 
 #fdfs_upload_test程序
-$(fdfs_upload_test):./test/fdfs_test.o $(obj)
+$(fdfs_upload_test):./test/fdfs_test_demo.o $(obj)
 	$(CC) $^ -o $@ $(LIBS)
 
 $(redis_api_test):./test/redis_api_test.o $(obj)
@@ -50,4 +51,4 @@ clean:
 distclean:
 	-rm -rf $(obj) $(target) ./test/*.o
 #将clean目标 改成一个虚拟符号
-.PHONY: clean ALL distclean
+.PHONY: clean ALL distclea

@@ -41,8 +41,12 @@ int main(int argc, char *argv[])
     {
         close(fd[0]);
         dup2(fd[1],STDOUT_FILENO);
-        execlp("fdfs_upload_file","sdsd","/etc/fdfs/client.conf",argv[1],NULL);
-        LOG(FDFS_TEST_MODULE,FDFS_TEST_PROC,"exec fdfs_upload_file error");
+        ret = execlp("fdfs_upload_file","sdsd","/etc/fdfs/client.conf",argv[1],NULL);
+        if (ret==-1)
+        {
+            LOG(FDFS_TEST_MODULE,FDFS_TEST_PROC,"exec fdfs_upload_file error");
+            exit(1);
+        }
     }
     //父进程关闭写端 重定向标准输出 连接管道的读端
     if(pid > 0) 

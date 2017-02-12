@@ -20,6 +20,7 @@ static const char rcsid[] = "$Id: echo.c,v 1.5 1999/07/28 00:29:37 roberts Exp $
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#include <sys/wait.h>
 #endif
 
 #ifdef _WIN32
@@ -29,34 +30,42 @@ extern char **environ;
 #endif
 
 #include "fcgi_stdio.h"
+#include "make_log.h"
+#include"fdfs_client.h"
+
+#define FASTCGI_UPLOAD "file_data and name"
+#define FASTCGI "fileid"
 
 #include "../include/util_cgi.h"
 
 
-static void PrintEnv(char *label, char **envp)
-{
-    printf("%s:<br>\n<pre>\n", label);
-    for ( ; *envp != NULL; envp++) {
-        printf("%s\n", *envp);
-    }
-    printf("</pre><p>\n");
-}
 
+
+/*
+ * static void PrintEnv(char *label, char **envp)
+ * {
+ *     printf("%s:<br>\n<pre>\n", label);
+ *     for ( ; *envp != NULL; envp++) {
+ *         printf("%s\n", *envp);
+ *     }
+ *     printf("</pre><p>\n");
+ * }
+ * 
+ */
 int main ()
 {
-    char **initialEnv = environ;
-    int count = 0;
-    
+    /*
+     * char **initialEnv = environ;
+     * int count = 0;
+     */
+
     while (FCGI_Accept() >= 0) 
     {
         char *contentLength = getenv("CONTENT_LENGTH");
         int len;
 
         printf("Content-type: text/html\r\n"
-               "\r\n"
-               "<title>FastCGI echo</title>"
-               "<h1>FastCGI echo</h1>\n"
-               "Request number %d,  Process ID: %d<p>\n", ++count, getpid());
+               "\r\n");
 
         if (contentLength != NULL) 
         {
@@ -75,10 +84,10 @@ int main ()
         {
             int i, ch;
 
-            char buf [409600] = {0};
+            char*buf = (char *)malloc(len);
             char *temp_p = buf;
 
-            printf("Standard input:<br>\n<pre>\n");
+            /* printf("Standard input:<br>\n<pre>\n"); */
             for (i = 0; i < len; i++) 
             {
                 if ((ch = getchar()) < 0) 
@@ -90,11 +99,6 @@ int main ()
                 *temp_p = ch;
                 temp_p++;
             }
-
-            FILE* ss= fopen("mdmdm.md","w");
-            fwrite(buf,len,1,ss);
-            fclose(ss);
-
             /* printf("\n</pre><p>\n"); */
             char *left = memstr(buf,len,"filename");
             char *temp_name = strtok(left,"\r\n");
@@ -103,10 +107,27 @@ int main ()
             char *type = memstr(buf,len,"Content-Type");
             char *con = strtok(type,"\r");
             type+=strlen(con)+4;
-             
+
             int temp_len = len - (type - buf);
             char *end = memstr(type,temp_len,"-------------");
-            
+
+            int ret;
+            char* file_id = (char *)malloc(1024);
+            char* torage_ip = (char *)malloc(1024);
+
+
+            ret = dfs_init(getpid(),"/etc/fdfs/client.conf");
+            if(ret != 0)
+            {
+                LOG(FASTCGI,FASTCGI_UPLOAD,"dfs_init error");
+            }
+            ret = upload_file(type,end-type-2,file_id,torage_ip);
+            if (ret != 0) 
+            {
+                LOG(FASTCGI,FASTCGI_UPLOAD,"upload_file error");
+                exit(1);
+            }
+
             FILE* fp = fopen(name,"w");
             if (fp == NULL)
             {
@@ -115,12 +136,16 @@ int main ()
             }
             fwrite(type,1,end-type-2,fp);
             fclose(fp);
-        }
-        PrintEnv("Request environment", environ);
-        PrintEnv("Initial environment", initialEnv);
-    } /* while */
+            free(buf);
 
-
-
+            printf("%s:%s\n",torage_ip,file_id); 
+            
+            free(file_id);
+            free(torage_ip);
+            /* PrintEnv("Request environment", environ); */
+            /* PrintEnv("Initial environment", initialEnv); */
+        } /* while */
+    }
     return 0;
+    
 }
